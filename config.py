@@ -1,2 +1,1 @@
-ow_api_key= "0827c8517463babb8a86326f5db3f960"
-g_api_key = "AIzaSyCfWflT4UE8SUT2EswhgZKFGh5HB0BL-NQ"
+ow_api_key= "342be2d87aa1a01ee23d2f18e71b767e"

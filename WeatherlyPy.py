@@ -1,28 +1,19 @@
-
-# coding: utf-8
-
-# In[1]:
-
-
+#Import Dependencies
 import json
 import requests
 from citipy import citipy
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sb
 import time
 from datetime import timedelta,datetime,date
 
-
-#Google and Open Weather API import from file
-from config import g_api_key, ow_api_key
+#Open Weather API import from file
+from config import  ow_api_key
 
 #Starting date for date/time converstion from UTC values
 st = datetime(1899,12,31)
 
-
-# In[2]:
 
 
 #list of cities wasw published on OpenWeatherMap.org so I imported the data
@@ -31,12 +22,10 @@ city_df= pd.read_table(city_list, encoding="windows-1252")
 city_df["countryCode"]=city_df["countryCode"].str.lower()
 
 
-# In[3]:
-
 
 #1600 cities sampled from the imported city_list
 city_samp=city_df
-city_samp=city_samp.sample(n=1600)
+city_samp=city_samp.sample(n=850)
 city_samp.reset_index()
 #city_delt = city_df[~city_df.isin(city_samp)].dropna()
 #alt_cities=city_delt["nm"].to_dict()
@@ -45,18 +34,6 @@ cities_id= city_samp["id"].to_dict()
 cities=city_samp["nm"]
 
 
-# In[4]:
-
-
-#Test of Try-Exception error for nonsense cities
-#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#dummies="dummy_cities.txt"
-#dummy_cit= pd.read_table(dummies, encoding="windows-1252")
-#dummy_cit=dummy_cit["BHFFB"]
-#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-
-# In[5]:
 
 
 url="http://api.openweathermap.org/data/2.5/weather?"
@@ -64,8 +41,6 @@ units="imperial"
 query_url= url+"appid="+ow_api_key+"&units="+units+"&q="
 plot_data=pd.DataFrame({"city_id":[],"city":[],"lon":[],"lat":[],"temp":[],"humid_perc":[],"clouds":[],"wind_mph":[]})
 
-
-# In[6]:
 
 
 #storage arrays for data results
@@ -84,7 +59,6 @@ city_err=[]
 json_dumps=[]
 
 
-# In[7]:
 
 
 rec_cnt=1
@@ -132,8 +106,6 @@ max_d= str(max(w_date))
 print("Latest data as of:"+max_d+" of API Request")
 
 
-# In[10]:
-
 
 #Displays a summary of the data pulled that was usable vs. unusable
 print("""~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~""")
@@ -143,8 +115,6 @@ print("| Total Cities Unusabled: {0:,}\t\t\t\t\t\t\t\t\t\t\t\t|".format(len(city
 print("""~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~""")
 
 
-# In[11]:
-
 
 #Create a dataframe to hold all of the data pulled from the API
 data_plot=pd.DataFrame(np.column_stack([city_nm,  city_id,  cntry,w_date,  lon,  lat,  temp,  max_temp, humid,  clouds,  wind,]),
@@ -152,8 +122,6 @@ data_plot=pd.DataFrame(np.column_stack([city_nm,  city_id,  cntry,w_date,  lon, 
 data_plot=data_plot.dropna(how="any")
 #data_plot.head()
 
-
-# In[12]:
 
 
 #Generate Latitude vs Temperature scatterplot
@@ -179,9 +147,8 @@ ax.set_ylabel("Max Temperature (F)", fontsize=10)
 ax.set_title("City Latitude vs. Max Temperature (F)\n ({0:}))".format(max_d), fontsize=15,pad=5)
 
 fig.tight_layout()
+fig.savefig('Latitude_v_Temp.png')
 
-
-# In[13]:
 
 
 #Generate City Latitude vs. Humidity scatterplot
@@ -207,9 +174,8 @@ ax.set_xlabel("Latitude",fontsize=10,)
 ax.set_ylabel("Humidity in Percent", fontsize=10)
 ax.set_title("City Latitude vs. Humidity %\n ({0:}))".format(max_d), fontsize=15,pad=5)
 fig.tight_layout()
+fig.savefig('Latitude_v_Humidity.png')
 
-
-# In[14]:
 
 
 #Generate City Latitude vs. Cloudiness
@@ -232,12 +198,11 @@ plt.ylim([min(x_c_axis)-10, max(x_c_axis)+10])
 plt.ylim([min(y_c_axis)-10, max(y_c_axis)+10])
 #plt.ylim([-2.5, 102])
 ax.set_xlabel("Latitude",fontsize=10,)
-ax.set_ylabel("Cloudiness", fontsize=10)
-ax.set_title("City Latitude vs. Cloudiness\n ({0:}))".format(max_d), fontsize=15,pad=5)
+ax.set_ylabel("Cloudiness (%)", fontsize=10)
+ax.set_title("City Latitude vs. Cloudiness (%)\n ({0:}))".format(max_d), fontsize=15,pad=5)
 fig.tight_layout()
+fig.savefig('Latitude_v_Cloud.png')
 
-
-# In[15]:
 
 
 #Generate City Latitude vs. Windspeed (MPH)
@@ -263,4 +228,15 @@ ax.set_xlabel("Latitude",fontsize=10,)
 ax.set_ylabel("Windspeed in MpH", fontsize=10)
 ax.set_title("City Latitude vs. Windspeed (MPH)\n ({0:}))".format(max_d), fontsize=15,pad=5)
 fig.tight_layout()
+fig.savefig('Latitude_v_Windspeed.png')
+
+
+
+#Data Output generation
+
+city_df.to_csv("city_df.csv", index=False, header=True)
+city_samp.to_csv("city_samp.csv", index=False, header=True)
+city_err= pd.DataFrame(city_err)
+city_err.to_csv("city_err.csv", index=False, header=True)
+data_plot.to_csv("data_plot.csv", index=False, header=True)
 
